@@ -97,7 +97,9 @@ class LinearClassifier(object):
     # TODO:                                                                   #
     # Implement this method. Store the predicted labels in y_pred.            #
     ###########################################################################
-    pass
+    num_train = X.shape[0] # number of rows in X
+    scores = X.dot(self.W) # prediction scores of our classifier
+    y_pred = np.argmax(scores, axis=1) # column numbers of best scores for each row
     ###########################################################################
     #                           END OF YOUR CODE                              #
     ###########################################################################
