@@ -24,7 +24,6 @@ def svm_loss_naive(W, X, y, reg):
   delta = 1
   # compute the loss and the gradient
   # see https://math.stackexchange.com/questions/2572318/derivation-of-gradient-of-svm-loss/2572319#2572319?
-  # see https://bruceoutdoors.wordpress.com/2016/05/06/cs231n-assignment-1-tutorial-q2-training-a-support-vector-machine/
   num_classes = W.shape[1]
   num_train = X.shape[0]
   loss = 0.0
@@ -45,8 +44,8 @@ def svm_loss_naive(W, X, y, reg):
   sum_incorrect_predictions = np.sum(margins > 0, axis=1)
   for j in xrange(num_classes):
     wj = np.sum(X[margins[:, j] > 0], axis=0) # gradient of loss for incorrect classes, the > operator will act as the indicator func
-    wyi = np.sum(sum_incorrect_predictions[y == j][:, np.newaxis] * X[y == j], axis=0) # gradient of loss for the correct class
-    dW[:, j] = wj - wyi
+    wyi = - np.sum(sum_incorrect_predictions[y == j][:, np.newaxis] * X[y == j], axis=0) # gradient of loss for the correct class
+    dW[:, j] = wj + wyi
       
   # Right now the loss is a sum over all training examples, but we want it
   # to be an average instead so we divide by num_train.
@@ -55,7 +54,7 @@ def svm_loss_naive(W, X, y, reg):
 
   # Add regularization to the loss.
   loss += reg * np.sum(W * W)
-
+  #dW += 2 * reg * dW 
   #############################################################################
   # TODO:                                                                     #
   # Compute the gradient of the loss function and store it dW.                #
@@ -104,18 +103,23 @@ def svm_loss_vectorized(W, X, y, reg):
   # to reuse some of the intermediate values that you used to compute the     #
   # loss.                                                                     #
   #############################################################################
-  sum_incorrect_predictions = np.sum(margins > 0, axis=1)
-  for j in xrange(num_classes):
-    wj = np.sum(X[margins[:, j] > 0], axis=0) # gradient of loss for incorrect classes, the > operator will act as the indicator func
-    wyi = np.sum(sum_incorrect_predictions[y == j][:, np.newaxis] * X[y == j], axis=0) # gradient of loss for the correct class
-    dW[:, j] = wj - wyi
+  
+  number_of_incorrect_predictions_per_example = np.sum(margins>0,axis=1)
+  wj = np.zeros(margins.shape)
+  wyi = np.zeros(margins.shape)
+  wj[margins>0] = 1
+  wyi[np.arange(num_train), y] = -number_of_incorrect_predictions_per_example
+  w_yi_j = wj + wyi
+  dW = X.T.dot(w_yi_j)
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
 
   loss /= num_train
-  dW /= num_train
+  
 
   loss += reg * np.sum(W * W)
-
+  dW += 2 * reg * W
+  dW /= num_train
+    
   return loss, dW
