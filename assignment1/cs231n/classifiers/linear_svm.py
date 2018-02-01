@@ -83,6 +83,7 @@ def svm_loss_vectorized(W, X, y, reg):
   # Implement a vectorized version of the structured SVM loss, storing the    #
   # result in loss.                                                           #
   #############################################################################
+
   scores = X.dot(W)
   correct_class_scores = scores[xrange(num_train), y]
   margins = scores - correct_class_scores[:, np.newaxis] + delta
@@ -111,14 +112,14 @@ def svm_loss_vectorized(W, X, y, reg):
   wyi[np.arange(num_train), y] = -number_of_incorrect_predictions_per_example
   w_yi_j = wj + wyi
   dW = X.T.dot(w_yi_j)
+  
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
 
   loss /= num_train
-  
-
   loss += reg * np.sum(W * W)
+    
   dW += 2 * reg * W
   dW /= num_train
     
