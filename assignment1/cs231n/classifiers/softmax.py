@@ -39,14 +39,17 @@ def softmax_loss_naive(W, X, y, reg):
     sum_of_incorrects = np.sum(incorrect_predictions_exp)
     loss += -correct_prediction + np.log(sum_of_incorrects) 
   
-  print(scores.shape)
-  print(sum_of_incorrects.shape)
-  print(X.shape)
-  print(W.shape)
+  #print(scores.shape)
+  #print(sum_of_incorrects.shape)
+  #print(X.shape)
+  #print(W.shape)
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
 
+  loss /= num_train
+  loss += reg * np.sum(W * W)
+    
   return loss, dW
 
 
