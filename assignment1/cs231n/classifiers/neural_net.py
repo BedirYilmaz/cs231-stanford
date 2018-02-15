@@ -77,24 +77,27 @@ class TwoLayerNet(object):
     # shape (N, C).                                                             #
     #############################################################################
     
-    # fully connected
+    # fully connected 1
     W1x = np.dot(X,W1)
     W1x_b1 = W1x + b1
     
-    #ReLU
+    # ReLU
     W1x_b1_max = np.maximum(0,W1x_b1)
     
     # fully connected 2
     W1x_b1_max_W2 = np.dot(W1x_b1_max, W2)
-    W1x_b1_max_W2_b1 = W1x_b1_max_W2 + b2
+    W1x_b1_max_W2_b2 = W1x_b1_max_W2 + b2
     
-    scores = W1x_b1_max_W2_b1
+    scores = W1x_b1_max_W2_b2
     
-    print(W1x.shape)
-    print(W1x_b1.shape)
-    print(W1x_b1_max_W2.shape)
+    #print(W1.shape)
+    #print(W2.shape)
+    #print(np.dot(W1,W2).shape)
+    #print(W1x.shape)
+    #print(W1x_b1.shape)
+    #print(W1x_b1_max_W2.shape)
     #print(W1x_b1)
-    print(W1x_b1_max)
+    #print(W1x_b1_max)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -111,7 +114,13 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
-    pass
+    exp_scores = np.exp(scores)
+    probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True) # [N x K]  
+    correct_logprobs = -np.log(probs[range(N),y])
+    data_loss = np.sum(correct_logprobs)/N  
+    reg_loss = 0.5 * reg * ( np.sum(W1**2) + np.sum(W2**2) )
+    #reg_loss += 0.5*reg*np.sum(self.params['W2']**2)
+    loss = data_loss + reg_loss
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
