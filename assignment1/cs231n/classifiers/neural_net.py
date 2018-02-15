@@ -76,7 +76,25 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    
+    # fully connected
+    W1x = np.dot(X,W1)
+    W1x_b1 = W1x + b1
+    
+    #ReLU
+    W1x_b1_max = np.maximum(0,W1x_b1)
+    
+    # fully connected 2
+    W1x_b1_max_W2 = np.dot(W1x_b1_max, W2)
+    W1x_b1_max_W2_b1 = W1x_b1_max_W2 + b2
+    
+    scores = W1x_b1_max_W2_b1
+    
+    print(W1x.shape)
+    print(W1x_b1.shape)
+    print(W1x_b1_max_W2.shape)
+    #print(W1x_b1)
+    print(W1x_b1_max)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
