@@ -118,8 +118,7 @@ class TwoLayerNet(object):
     probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True) # [N x K]  
     correct_logprobs = -np.log(probs[range(N),y])
     data_loss = np.sum(correct_logprobs)/N  
-    reg_loss = reg * ( np.sum(W1**2) + np.sum(W2**2) )   
-    #reg_loss += 0.5*reg*np.sum(self.params['W2']**2)
+    reg_loss = reg * ( np.sum(W1**2) + np.sum(W2**2) )
     loss = data_loss + reg_loss
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -132,7 +131,15 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    dscores = probs
+    dscores[range(N),y] -= 1
+    dscores /= N
+    
+    dhidden = np.dot(dscores, W2.T)
+    dhidden[W1x_b1_max <= 0] = 0
+
+    grads['W1'] = np.dot(X.T, dhidden)
+    grads['W2'] = np.dot(W1x_b1_max.T, dscores)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
