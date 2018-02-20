@@ -133,7 +133,7 @@ class TwoLayerNet(object):
     #############################################################################
     dscores = probs
     dscores[range(N),y] -= 1
-    #dscores /= N
+    dscores /= N
     
     dhidden = np.dot(dscores, W2.T)
     dhidden[W1x_b1_max <= 0] = 0
@@ -143,12 +143,8 @@ class TwoLayerNet(object):
     dW1 = np.dot(X.T, dhidden)
     dW2 = np.dot(W1x_b1_max.T, dscores)
     
-    db2 /= N
-    dW2 /= N
-    dW2 += reg * W2
-    db1 /= N
-    dW1 /= N
-    dW1 += reg * W1
+    dW2 += 2 * reg * W2
+    dW1 += 2 * reg * W1
     
     grads['b1'] = db1
     grads['b2'] = db2
