@@ -179,7 +179,6 @@ class TwoLayerNet(object):
     """
     num_train = X.shape[0]
     num_val = X_val.shape[0]
-    print(X_val.shape)
     iterations_per_epoch = max(num_train / batch_size, 1)
 
     # Use SGD to optimize the parameters in self.model
@@ -225,7 +224,6 @@ class TwoLayerNet(object):
 
       # Every epoch, check train and val accuracy and decay learning rate.
       if it % iterations_per_epoch == 0:
-        print('epoch')
         # Check accuracy
         train_acc = (self.predict(X_batch) == y_batch).mean()
         val_acc = (self.predict(X_val) == y_val).mean()
