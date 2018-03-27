@@ -47,7 +47,14 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W1' and 'b1' and second layer weights #
         # and biases using the keys 'W2' and 'b2'.                                 #
         ############################################################################
-        pass
+        W1 = weight_scale * np.random.randn(input_dim,hidden_dim)
+        W2 = weight_scale * np.random.randn(hidden_dim,num_classes)
+        b1 = np.zeros(hidden_dim)
+        b2 = np.zeros(num_classes)
+        self.params['W1'] = W1
+        self.params['W2'] = W2
+        self.params['b1'] = b1
+        self.params['b2'] = b2
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -77,7 +84,18 @@ class TwoLayerNet(object):
         # TODO: Implement the forward pass for the two-layer net, computing the    #
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
-        pass
+        #print(X.shape)
+        #print(self.params["W1"].shape)
+        #print(self.params["b1"].shape)
+        w1 = self.params["W1"]
+        b1 = self.params["b1"]
+        w2 = self.params["W2"]
+        b2 = self.params["b2"]
+        
+        out = affine_forward(X, w1, b1)
+        out = relu_forward(out[0])
+        out = affine_forward(out[0], w2, b2)
+        scores = out[0]
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
