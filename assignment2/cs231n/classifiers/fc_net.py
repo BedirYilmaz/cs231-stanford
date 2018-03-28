@@ -92,10 +92,10 @@ class TwoLayerNet(object):
         w2 = self.params["W2"]
         b2 = self.params["b2"]
         
-        out = affine_forward(X, w1, b1)
-        out = relu_forward(out[0])
-        out = affine_forward(out[0], w2, b2)
-        scores = out[0]
+        out_affine1, cache_affine1 = affine_forward(X, w1, b1)
+        out_relu, cache_relu = relu_forward(out_affine1)
+        out_affine2, cache_affine2 = affine_forward(out_relu, w2, b2)
+        scores = out_affine2
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -115,7 +115,25 @@ class TwoLayerNet(object):
         # automated tests, make sure that your L2 regularization includes a factor #
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
-        pass
+        
+        # softmax loss 
+        loss, dscores = softmax_loss(scores, y)
+        
+        # L2 regularization
+        loss += self.reg * 0.5 * (np.sum(self.params["W1"]**2) + np.sum(self.params["W2"]**2))
+        
+        #gradients
+        dReLU, dw2, db2 = affine_backward(dscores, cache_affine2)
+        dAff = relu_backward(dReLU, out_affine1)
+        dx, dw1, db1 = affine_backward(dAff, cache_affine1)
+        
+        dw2 += self.reg * w2
+        dw1 += self.reg * w1
+        
+        grads["W1"] = dw1
+        grads["b1"] = db1
+        grads["W2"] = dw2
+        grads["b2"] = db2
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
