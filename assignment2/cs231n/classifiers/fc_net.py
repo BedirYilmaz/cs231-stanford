@@ -242,7 +242,6 @@ class FullyConnectedNet(object):
     def loss(self, X, y=None):
         """
         Compute loss and gradient for the fully-connected net.
-
         Input / output: Same as TwoLayerNet above.
         """
         X = X.astype(self.dtype)
@@ -276,26 +275,24 @@ class FullyConnectedNet(object):
         # repeating block
         for i in range(1, self.num_layers-1):
             i_str = str(i)
-            #print("forward layer " + i_str)
+            print("forward layer " + i_str)
             weight_name = "W" + i_str
             bias_name = "b" + i_str
-            cache_a = "cache_a" + i_str
-            cache_r = "cache_r" + i_str
-            out_a = "out_a" + i_str
-            out_r = "out_r" + i_str
+            cache = "c"+i_str
+            out = "o"+i_str
             
-            self.outs[out_a], self.caches[cache_a] = affine_forward(X, self.params[weight_name], self.params[bias_name])
-            self.outs[out_r], self.caches[cache_r] = relu_forward(self.outs[out_a])
-            X = self.outs[out_r]
+            self.outs[out], self.caches[cache] = affine_relu_forward(X, self.params[weight_name], self.params[bias_name])
+            X = self.outs[out]
         
         i_str = str(self.num_layers-1)
         #print("forward layer " + i_str)
         weight_name = "W" + i_str
         bias_name = "b" + i_str
-        cache_a = "cache_a" + i_str
-        out_a = "out_a" + i_str
-        self.outs[out_a], self.caches[cache_a] = affine_forward(self.outs[out_r], self.params[weight_name], self.params[bias_name])
-        scores = self.outs[out_a]
+        cache = "c" + i_str
+        out = "o" + i_str
+        
+        self.outs[out], self.caches[cache] = affine_forward(X, self.params[weight_name], self.params[bias_name])
+        scores = self.outs[out]
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -319,41 +316,30 @@ class FullyConnectedNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         loss, dscores = softmax_loss(scores,y)
-        
         # regularization
         # L2 regularization
         # loss += self.reg * 0.5 * (np.sum(self.params["W1"]**2) + np.sum(self.params["W2"]**2))
         for i in range(1, self.num_layers):
-            #print("regularization " + str(i))
             weight_name = "W" + str(i)
             loss += self.reg * 0.5 * np.sum(self.params[weight_name]**2)
         
+        #print("backwards " + i_str)
         i_str = str(self.num_layers-1)
-        dReLU, grads["W"+i_str], grads["b"+i_str] = affine_backward(dscores, self.caches["cache_a" + i_str])
+        dReLU, grads["W"+i_str], grads["b"+i_str] = affine_backward(dscores, self.caches["c"+i_str])
+        #print("backwards " + i_str + " done")
         
         # gradient computation repeated part
-        for i in range(1, self.num_layers-1):
+        for i in range(self.num_layers-2, 0, -1):
             i_str = str(i)
-            dAff = relu_backward(dReLU, self.outs["out_a"+i_str])
-            dx, grads["W"+i_str], grads["b"+i_str] = affine_backward(dAff, self.caches["cache_a" + i_str])
-            dReLU = dx
-        
-        #dReLU, dw2, db2 = affine_backward(dscores, cache_affine2)
-        #dAff = relu_backward(dReLU, out_affine1)
-        #dx, dw1, db1 = affine_backward(dAff, cache_affine1)
+            #print("backwards " + i_str)
+            dReLU, grads["W"+i_str], grads["b"+i_str] = affine_relu_backward(dReLU, self.caches["c"+i_str])
+            #print("backwards " + i_str + " done")
         
         # apply regression on gradients
         for i in range(1, self.num_layers):
             i_str = str(i)
             grads["W"+i_str] += self.reg * self.params["W"+i_str]
         
-        #dw2 += self.reg * w2
-        #dw1 += self.reg * w1
-        
-        #grads["W1"] = dw1
-        #grads["b1"] = db1
-        #grads["W2"] = dw2
-        #grads["b2"] = db2
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################

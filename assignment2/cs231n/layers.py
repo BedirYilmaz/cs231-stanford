@@ -25,14 +25,10 @@ def affine_forward(x, w, b):
     # TODO: Implement the affine forward pass. Store the result in out. You   #
     # will need to reshape the input into rows.                               #
     ###########################################################################
-    #x = x.reshape(x.shape[0],int(np.prod(x.shape)/x.shape[0]))
-    #print(x.shape)
-    #print(w.shape)
-    #print(b.shape)
-    
-    out = x.reshape(x.shape[0],np.prod(x.shape[1:])).dot(w)
-    #print(b.shape)
-    out = out+b
+    N = x.shape[0]
+    dims = np.prod(x.shape[1:])
+    xr = x.reshape(N, dims)
+    out = xr.dot(w) + b
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -58,12 +54,13 @@ def affine_backward(dout, cache):
     x, w, b = cache
     dx, dw, db = None, None, None
     
-    #print(x.shape)
-    xr = x.reshape(x.shape[0],int(np.prod(x.shape)/x.shape[0]))
-    #print(xr.shape)
     ###########################################################################
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
+    N = x.shape[0]
+    dims = np.prod(x.shape[1:])
+    xr = x.reshape(N, dims)
+    
     db = sum(dout)
     dx = dout.dot(w.T)
     dw = xr.T.dot(dout)
