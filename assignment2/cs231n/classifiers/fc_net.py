@@ -200,25 +200,32 @@ class FullyConnectedNet(object):
         # parameters should be initialized to zero.                                #
         ############################################################################
         
+        
+        
         i = 1
-        #print("initializing layer " + str(i))
+        print("initializing layer " + str(i))
         i_str = str(i)
         weight_name = "W" + i_str
         bias_name = "b" + i_str
-        self.params[weight_name] = weight_scale * np.random.randn(input_dim,hidden_dims[i-1])
-        self.params[bias_name] = np.zeros(hidden_dims[i-1])
+        self.params[weight_name] = weight_scale * np.random.randn(input_dim,hidden_dims[0])
+        self.params[bias_name] = np.zeros(hidden_dims[0])
         
         for i in range(2, self.num_layers-1):
-            #print("initializing layer " + str(i))
+            print("blop")
+            print("initializing layer " + str(i))
             i_str = str(i)
             weight_name = "W" + i_str
             bias_name = "b" + i_str
             self.params[weight_name] = weight_scale * np.random.randn(hidden_dims[i-1],hidden_dims[i])
             self.params[bias_name] = np.zeros(hidden_dims[i])
             
-        #print("initializing layer " + str(self.num_layers-1) + " number of hidden dim layers : " + str(len(hidden_dims)))
+        print("initializing layer " + str(self.num_layers-1) + " number of hidden dim layers : " + str(len(hidden_dims)))
         self.params['W'+str(self.num_layers-1)] = weight_scale * np.random.randn(hidden_dims[-1],num_classes)
         self.params['b'+str(self.num_layers-1)] = np.zeros(num_classes)
+        
+        
+        print(self.params["W1"].shape)
+        print(self.params["W2"].shape)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -278,6 +285,7 @@ class FullyConnectedNet(object):
         
         self.caches = {}
         
+        scores = X
         # repeating block
         for i in range(1, self.num_layers-1):
             i_str = str(i)
@@ -286,7 +294,7 @@ class FullyConnectedNet(object):
             bias_name = "b" + i_str
             cache = "c"+i_str
             
-            X, self.caches[cache] = affine_relu_forward(X, self.params[weight_name], self.params[bias_name])            
+            scores, self.caches[cache] = affine_relu_forward(scores, self.params[weight_name], self.params[bias_name])            
             #print("forward layer " + i_str + " end")
         
         i_str = str(self.num_layers-1)
@@ -294,10 +302,9 @@ class FullyConnectedNet(object):
         weight_name = "W" + i_str
         bias_name = "b" + i_str
         cache = "c" + i_str
-        #print("forward layer " + i_str + "end")
         
-        scores, self.caches[cache] = affine_forward(X, self.params[weight_name], self.params[bias_name])
-        
+        scores, self.caches[cache] = affine_forward(scores, self.params[weight_name], self.params[bias_name])
+        #print("forward layer " + i_str + " end")
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -329,16 +336,17 @@ class FullyConnectedNet(object):
             loss += self.reg * 0.5 * np.sum(self.params[weight_name]**2)
             #print(weight_name + " reg")
         
-        #print("backwards " + i_str)
+        
         i_str = str(self.num_layers-1)
-        dReLU, grads["W"+i_str], grads["b"+i_str] = affine_backward(dscores, self.caches["c"+i_str])
+        #print("backwards " + i_str)
+        dscores, grads["W"+i_str], grads["b"+i_str] = affine_backward(dscores, self.caches["c"+i_str])
         #print("backwards " + i_str + " done")
         
         # gradient computation repeated part
         for i in range(self.num_layers-2, 0, -1):
             i_str = str(i)
             #print("backwards " + i_str)
-            dReLU, grads["W"+i_str], grads["b"+i_str] = affine_relu_backward(dReLU, self.caches["c"+i_str])
+            dscores, grads["W"+i_str], grads["b"+i_str] = affine_relu_backward(dscores, self.caches["c"+i_str])
             #print("backwards " + i_str + " done")
         
         # apply regression on gradients
