@@ -56,7 +56,7 @@ def sgd_momentum(w, dw, config=None):
       moving average of the gradients.
     """
     if config is None: config = {}
-    config.setdefault('learning_rate', 1e-2)
+    config.setdefault('learning_rate', 1e-3)
     config.setdefault('momentum', 0.9)
     v = config.get('velocity', np.zeros_like(w))
 
@@ -65,7 +65,11 @@ def sgd_momentum(w, dw, config=None):
     # TODO: Implement the momentum update formula. Store the updated value in #
     # the next_w variable. You should also use and update the velocity v.     #
     ###########################################################################
-    pass
+    lr = config['learning_rate']
+    rho = config['momentum']
+    v = (rho * v) - (lr * dw)
+    w += v
+    next_w = w
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
