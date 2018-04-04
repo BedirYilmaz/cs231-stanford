@@ -204,7 +204,7 @@ class FullyConnectedNet(object):
         
         for i in range(self.num_layers) : 
             i_str = str(i+1)
-            print("initializing layer " + i_str)
+            #print("initializing layer " + i_str)
             weight_name = "W" + i_str
             bias_name = "b" + i_str
             
@@ -234,9 +234,9 @@ class FullyConnectedNet(object):
         #self.params['b'+str(self.num_layers-1)] = np.zeros(num_classes)
         
         
-        print(self.params["W1"].shape)
-        print(self.params["W2"].shape)
-        print(self.params["W3"].shape)
+        #print(self.params["W1"].shape)
+        #print(self.params["W2"].shape)
+        #print(self.params["W3"].shape)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -357,7 +357,7 @@ class FullyConnectedNet(object):
             loss += self.reg * 0.5 * np.sum(self.params[weight_name]**2)
             #print(weight_name + " reg")
             
-        print (len(self.caches["c3"]) )
+        #print (len(self.caches["c3"]) )
         
         for i in range(self.num_layers, 0, -1):
             i_str = str(i)
@@ -384,10 +384,10 @@ class FullyConnectedNet(object):
         #    dscores, grads["W"+i_str], grads["b"+i_str] = affine_relu_backward(dscores, self.caches["c"+i_str])
         #    #print("backwards " + i_str + " done")
         #
-        ## apply regression on gradients
-        #for i in range(1, self.num_layers):
-        #    i_str = str(i)
-        #    grads["W"+i_str] += self.reg * self.params["W"+i_str]
+        # apply regression on gradients
+        for i in range(1, self.num_layers+1):
+            i_str = str(i)
+            grads["W"+i_str] += self.reg * self.params["W"+i_str]
         
         ############################################################################
         #                             END OF YOUR CODE                             #
