@@ -211,32 +211,6 @@ class FullyConnectedNet(object):
             self.params[weight_name] = weight_scale * np.random.randn(ext_hidden_dims[i],ext_hidden_dims[i+1])
             self.params[bias_name] = np.zeros(ext_hidden_dims[i+1])
                 
-        
-        #i = 1
-        #print("initializing layer " + str(i))
-        #i_str = str(i)
-        #weight_name = "W" + i_str
-        #bias_name = "b" + i_str
-        #self.params[weight_name] = weight_scale * np.random.randn(input_dim,hidden_dims[0])
-        #self.params[bias_name] = np.zeros(hidden_dims[0])
-        #
-        #for i in range(2, self.num_layers-1):
-        #    print("blop")
-        #    print("initializing layer " + str(i))
-        #    i_str = str(i)
-        #    weight_name = "W" + i_str
-        #    bias_name = "b" + i_str
-        #    self.params[weight_name] = weight_scale * np.random.randn(hidden_dims[i-1],hidden_dims[i])
-        #    self.params[bias_name] = np.zeros(hidden_dims[i])
-        #    
-        #print("initializing layer " + str(self.num_layers-1) + " number of hidden dim layers : " + str(len(hidden_dims)))
-        #self.params['W'+str(self.num_layers-1)] = weight_scale * np.random.randn(hidden_dims[-1],num_classes)
-        #self.params['b'+str(self.num_layers-1)] = np.zeros(num_classes)
-        
-        
-        #print(self.params["W1"].shape)
-        #print(self.params["W2"].shape)
-        #print(self.params["W3"].shape)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -300,31 +274,17 @@ class FullyConnectedNet(object):
             i_str = str(i+1)
             weight_name = "W" + i_str
             bias_name = "b" + i_str
-            cache_name = "c"+i_str
+            cache_name = "c" + i_str
+            dropout_name = "d" + i_str
+            
+            if self.use_dropout:
+                scores, self.caches[dropout_name] = dropout_forward(scores, self.dropout_param)
+            
             if(i == self.num_layers-1):
                 scores, self.caches[cache_name] = affine_forward(scores, self.params[weight_name], self.params[bias_name])
             else:
                 scores, self.caches[cache_name] = affine_relu_forward(scores, self.params[weight_name], self.params[bias_name])
             
-        #scores = X
-        ## repeating block
-        #for i in range(1, self.num_layers-1):
-        #    i_str = str(i)
-        #    #print("forward layer " + i_str)
-        #    weight_name = "W" + i_str
-        #    bias_name = "b" + i_str
-        #    cache = "c"+i_str
-        #    
-        #    scores, self.caches[cache] = affine_relu_forward(scores, self.params[weight_name], self.params[bias_name])            
-        #    #print("forward layer " + i_str + " end")
-        #
-        #i_str = str(self.num_layers-1)
-        ##print("forward layer " + i_str)
-        #weight_name = "W" + i_str
-        #bias_name = "b" + i_str
-        #cache = "c" + i_str        
-        #scores, self.caches[cache] = affine_forward(scores, self.params[weight_name], self.params[bias_name])
-        ##print("forward layer " + i_str + " end")
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -361,29 +321,21 @@ class FullyConnectedNet(object):
         
         for i in range(self.num_layers, 0, -1):
             i_str = str(i)
+            dropout_name = "d" + i_str
             weight_name = "W" + i_str
             bias_name = "b" + i_str
             cache_name = "c" + i_str
+            
+            
             
             #print("backwards " + i_str)
             if (i == self.num_layers):
                 dscores, grads[weight_name], grads[bias_name] = affine_backward(dscores, self.caches[cache_name])
             else:            
                 dscores, grads[weight_name], grads[bias_name] = affine_relu_backward(dscores, self.caches[cache_name])
+            if self.use_dropout:
+                dscores = dropout_backward(dscores, self.caches[dropout_name])
         
-        
-        #i_str = str(self.num_layers-1)
-        ##print("backwards " + i_str)
-        #
-        ##print("backwards " + i_str + " done")
-        #
-        ## gradient computation repeated part
-        #for i in range(self.num_layers-2, 0, -1):
-        #    i_str = str(i)
-        #    #print("backwards " + i_str)
-        #    dscores, grads["W"+i_str], grads["b"+i_str] = affine_relu_backward(dscores, self.caches["c"+i_str])
-        #    #print("backwards " + i_str + " done")
-        #
         # apply regression on gradients
         for i in range(1, self.num_layers+1):
             i_str = str(i)
