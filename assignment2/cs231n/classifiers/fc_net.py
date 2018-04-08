@@ -210,7 +210,14 @@ class FullyConnectedNet(object):
             
             self.params[weight_name] = weight_scale * np.random.randn(ext_hidden_dims[i],ext_hidden_dims[i+1])
             self.params[bias_name] = np.zeros(ext_hidden_dims[i+1])
-                
+            
+            if self.use_batchnorm and i<len(ext_hidden_dims)-2:
+                gamma_name = "gamma" + i_str
+                beta_name = "beta" + i_str
+                self.params[gamma_name] = np.random.randn(ext_hidden_dims[i+1])
+                self.params[beta_name] = np.random.randn(ext_hidden_dims[i+1])
+            
+            
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -275,7 +282,10 @@ class FullyConnectedNet(object):
             weight_name = "W" + i_str
             bias_name = "b" + i_str
             cache_name = "c" + i_str
+            bn_cache_name = "bn" + i_str
             dropout_name = "d" + i_str
+            gamma_name = "gamma" + i_str
+            beta_name = "beta" + i_str
             
             if self.use_dropout:
                 scores, self.caches[dropout_name] = dropout_forward(scores, self.dropout_param)
@@ -283,7 +293,11 @@ class FullyConnectedNet(object):
             if(i == self.num_layers-1):
                 scores, self.caches[cache_name] = affine_forward(scores, self.params[weight_name], self.params[bias_name])
             else:
-                scores, self.caches[cache_name] = affine_relu_forward(scores, self.params[weight_name], self.params[bias_name])
+                if self.use_batchnorm:
+                    scores, self.caches[cache_name], self.caches[bn_cache_name] = affine_relu_forward_with_bn(scores, self.params[weight_name], self.params[bias_name], self.params[gamma_name], self.params[beta_name], self.bn_params[i-1])
+                else:
+                    scores, self.caches[cache_name] = affine_relu_forward(scores, self.params[weight_name], self.params[bias_name])
+                
             
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -325,14 +339,18 @@ class FullyConnectedNet(object):
             weight_name = "W" + i_str
             bias_name = "b" + i_str
             cache_name = "c" + i_str
-            
-            
+            bn_cache_name = "bn" + i_str
+            gamma_name = "gamma" + i_str
+            beta_name = "beta" + i_str
             
             #print("backwards " + i_str)
             if (i == self.num_layers):
                 dscores, grads[weight_name], grads[bias_name] = affine_backward(dscores, self.caches[cache_name])
-            else:            
-                dscores, grads[weight_name], grads[bias_name] = affine_relu_backward(dscores, self.caches[cache_name])
+            else:
+                if self.use_batchnorm:
+                    dscores, grads[weight_name], grads[bias_name], grads[gamma_name], grads[beta_name] = affine_relu_backward_with_bn(dscores, self.caches[cache_name], self.caches[bn_cache_name])
+                else:
+                    dscores, grads[weight_name], grads[bias_name] = affine_relu_backward(dscores, self.caches[cache_name])
             if self.use_dropout:
                 dscores = dropout_backward(dscores, self.caches[dropout_name])
         

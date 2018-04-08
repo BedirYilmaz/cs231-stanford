@@ -184,9 +184,9 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         # variance, storing your result in the running_mean and running_var   #
         # variables.                                                          #
         #######################################################################
-        m = np.mean(x)
-        v = np.mean((x-m)**2)
-        normalized_x = (x-m) / np.sqrt(v-eps)
+        m = np.mean(x , axis=0)
+        v = np.mean((x-m)**2, axis = 0)
+        normalized_x = (x-m.T) / np.sqrt(v.T+eps)
         scaled_shifted_normalized = gamma * normalized_x + beta
         out = scaled_shifted_normalized
         
@@ -213,7 +213,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
         #######################################################################
         m = bn_param['running_mean']
         v = bn_param['running_var']
-        normalized_x = (x-m) / np.sqrt(v-eps)
+        normalized_x = (x-m) / np.sqrt(v+eps)
         scaled_shifted_normalized = gamma*normalized_x + beta
         out = scaled_shifted_normalized
         #######################################################################
@@ -251,6 +251,10 @@ def batchnorm_backward(dout, cache):
     # TODO: Implement the backward pass for batch normalization. Store the    #
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
+    
+    # see https://arxiv.org/pdf/1502.03167.pdf
+    num_x = dout.shape[0]
+    
     n = cache["norm"]
     m = cache["mean"]
     v = cache["var"]
@@ -259,14 +263,15 @@ def batchnorm_backward(dout, cache):
     x = cache["x"]
     e = cache["eps"]
     
-    
     dn = dout*g
     dv = np.sum(dn * (x-m) * (-1/2) * (v + e)**(-3/2), axis=0)
-    dm = np.sum(dn * (-1/np.sqrt(v + e)) , axis=0) + dv * ((np.sum(-2*(x-m))) / m)
+    dm = np.sum(dn * (-1/np.sqrt(v + e)) , axis=0) + dv * np.sum(-2*(x-m) / num_x) 
+    
     dbeta = np.sum(dout, axis = 0)
     dgamma = np.sum(dout*n, axis = 0)
     
-    dx = dn * (1/np.sqrt(dv + e)) + dv * (2*(x-m)/m) + dm/m
+    dx = dn * (1/np.sqrt(v + e)) + dv * (2*(x-m)/num_x) + dm/num_x
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
