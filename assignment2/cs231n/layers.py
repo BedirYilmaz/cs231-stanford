@@ -414,7 +414,32 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    pass
+    P = conv_param['pad']
+    S = conv_param['stride']
+    N = x.shape[0]
+    C = x.shape[1]
+    H = x.shape[2]
+    W = x.shape[3]
+    F = w.shape[0]
+    HH = w.shape[2]
+    WW = w.shape[3]
+    
+    xp = np.zeros([N,C,H+P*2, W+P*2])
+    xp[:,:,P:P+H, P:P+W] = x    
+    
+    Ho = int(1 + (H + 2 * P - HH) / S)
+    Wo = int(1 + (W + 2 * P - WW) / S)
+    
+    out = np.zeros([N, F, Ho, Wo])
+    
+    for ii in range(0, N):
+        for fi in range(0, F):
+            for i in range(0, Ho):
+                for j in range(0, Wo):
+                    out[ii, fi, i, j] = np.sum(
+                        xp[ii, :, i*S:i*S+HH, j*S:j*S+WW]
+                           * w[fi, :, :, :]) + b[fi]
+    
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -439,7 +464,41 @@ def conv_backward_naive(dout, cache):
     ###########################################################################
     # TODO: Implement the convolutional backward pass.                        #
     ###########################################################################
-    pass
+    x,w,b,cp = cache
+    #print(dout.shape)
+    #print(x.shape)
+    #print(w.shape)
+    #print(b.shape)
+    
+    P = cp['pad']
+    S = cp['stride']
+    N = x.shape[0]
+    C = x.shape[1]
+    H = x.shape[2]
+    W = x.shape[3]
+    F = w.shape[0]
+    HH = w.shape[2]
+    WW = w.shape[3]
+    
+    xp = np.zeros([N,C,H+P*2, W+P*2])
+    xp[:,:,P:P+H, P:P+W] = x
+    dxp = np.zeros([N,C,H+P*2, W+P*2])
+    
+    dx = np.zeros(x.shape)
+    dw = np.zeros(w.shape)
+    db = np.zeros(b.shape)    
+    
+    _,_,Ho, Wo = dout.shape
+    
+    out = np.zeros([N, F, Ho, Wo])
+    
+    for ii in range(0, N):
+        for fi in range(0, F):
+            for i in range(0, Ho):
+                for j in range(0, Wo):
+                    dxp[ii, :, i*S:i*S+HH, j*S:j*S+WW] += w[fi, :, :, :] * dout[ii, fi, Ho, Wo]
+    
+    dx = dxp [:,:,P:P+H, P:P+W]
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
